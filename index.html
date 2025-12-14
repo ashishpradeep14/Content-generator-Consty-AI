@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Generator (Readable Transparent UI)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            /* Define the primary colors requested */
+            --color-red: #ff4757;
+            --color-violet: #8c7ae6;
+            --color-blue: #1e90ff;
+            --color-text-light: #f5f6fa;
+            --color-transparent-dark: rgba(0, 0, 0, 0.4); 
+            --color-strong-shadow: 0 0 5px rgba(0, 0, 0, 1), 0 0 10px rgba(0, 0, 0, 0.8); /* Strong shadow for readability */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 50px;
+            /* **LATEST UPDATED BACKGROUND IMAGE URL** */
+            background-image: url('https://i.pinimg.com/736x/ba/56/7c/ba567c938739bb2d1858a4e800e6ec6b.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            padding: 40px;
+            background: transparent; /* Transparent container */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); 
+            border-radius: 20px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--color-text-light);
+            /* Readable color via strong shadow */
+            text-shadow: var(--color-strong-shadow); 
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--color-text-light);
+            text-shadow: var(--color-strong-shadow);
+            margin-bottom: 30px;
+        }
+
+        /* --- Input Area Styling (Transparent) --- */
+        .input-area {
+            margin-bottom: 30px;
+            background: transparent;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--color-transparent-dark);
+        }
+
+        #prompt-input {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: transparent; /* Transparent input field */
+            color: var(--color-text-light); /* Readable input text color */
+            font-size: 1.1em;
+            resize: none;
+            margin-bottom: 20px;
+            outline: none;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8); /* Shadow on input text */
+        }
+
+        #prompt-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+        }
+
+        #prompt-input:focus {
+            box-shadow: 0 0 15px var(--color-blue);
+            background: rgba(0, 0, 0, 0.1);
+            border-color: var(--color-blue);
+        }
+
+        /* --- Transparent Buttons --- */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .transparent-btn {
+            padding: 12px 25px;
+            border: 2px solid;
+            background-color: transparent;
+            color: var(--color-text-light);
+            font-size: 1em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px); 
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8); /* Shadow for button text */
+        }
+
+        .red-shadow { border-color: var(--color-red); }
+        .red-shadow:hover:not(:disabled) {
+            background-color: var(--color-red);
+            box-shadow: 0 0 20px var(--color-red);
+            transform: translateY(-2px);
+        }
+
+        .violet-shadow { border-color: var(--color-violet); }
+        .violet-shadow:hover:not(:disabled) {
+            background-color: var(--color-violet);
+            box-shadow: 0 0 20px var(--color-violet);
+            transform: translateY(-2px);
+        }
+        
+        .transparent-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Result Box Styling (Transparent) --- */
+        .result-box {
+            min-height: 250px;
+            background: transparent; /* Transparent result box */
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--color-blue);
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+            margin-top: 30px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            /* Readable color via strong shadow */
+            color: var(--color-text-light);
+            text-shadow: var(--color-strong-shadow); 
+        }
+        
+        /* Ensure headers in pre/content also have strong shadows and color */
+        .result-box pre h3 {
+             color: var(--color-blue);
+             text-shadow: var(--color-strong-shadow); 
+        }
+
+
+        .placeholder-text {
+            color: var(--color-text-light);
+            text-shadow: var(--color-strong-shadow);
+            text-align: center;
+            padding-top: 100px;
+            font-style: italic;
+        }
+        
+        .placeholder-text.loading {
+            color: var(--color-blue);
+            font-style: normal;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.5); /* Kept slightly dark for contrast on data */
+            border-radius: 10px;
+            border: 1px solid var(--color-transparent-dark);
+            color: var(--color-text-light);
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
+        }
+
+        .stat-item {
+            text-align: center;
+            color: var(--color-text-light);
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--color-blue);
+            text-decoration: none;
+        }
+        
+        .stat-value.red-link {
+            color: var(--color-red);
+            transition: color 0.2s;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .button-group {
+                flex-direction: column;
+            }
+            .transparent-btn {
+                width: 100%;
+            }
+            .container {
+                padding: 20px;
+            }
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <main class="content-generator">
+            <h1 class="title">✨ Consty-Content AI Generator</h1>
+            <p class="subtitle">Craft summaries and stories instantly with advanced models.</p>
+
+            <div class="input-area">
+                <textarea id="prompt-input" placeholder="Enter your topic (e.g., 'The future of quantum computing') or story idea..."></textarea>
+                
+                <div class="button-group">
+                    <button id="summary-btn" class="transparent-btn red-shadow" data-type="summary">
+                        Generate Summary
+                    </button>
+                    <button id="story-btn" class="transparent-btn violet-shadow" data-type="story">
+                        Generate Story
+                    </button>
+                </div>
+            </div>
+
+            <div id="result-container" class="result-box">
+                <p class="placeholder-text">Output will appear here...</p>
+            </div>
+            
+            <div id="stats-container" class="stats-bar">
+                </div>
+        </main>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT LOGIC (Simulated Frontend) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const promptInput = document.getElementById('prompt-input');
+            const resultContainer = document.getElementById('result-container');
+            const statsContainer = document.getElementById('stats-container');
+            const summaryBtn = document.getElementById('summary-btn');
+            const storyBtn = document.getElementById('story-btn');
+
+            const buttons = [summaryBtn, storyBtn];
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const prompt = promptInput.value.trim();
+                    const type = button.getAttribute('data-type');
+                    
+                    if (!prompt) {
+                        alert('Please enter a topic or prompt first!');
+                        return;
+                    }
+
+                    generateContent(prompt, type);
+                });
+            });
+
+            function generateContent(prompt, type) {
+                // 1. Show Loading State
+                resultContainer.innerHTML = `<p class="placeholder-text loading">
+                    Generating ${type} for "${prompt}"... (Simulating backend work)
+                </p>`;
+                statsContainer.innerHTML = '';
+                buttons.forEach(btn => btn.disabled = true);
+
+                // 2. Simulate API Call Delay (In a real app, you'd use fetch() here)
+                setTimeout(() => {
+                    // --- Simulated Data Response based on the type ---
+                    const content = type === 'summary' 
+                        ? `
+                        <h3>Summary: The Synthesis of ${prompt}</h3>
+
+                        This summary provides a comprehensive overview of the key concepts and historical context surrounding the topic. The core ideas highlight its societal impact, the latest technological advancements, and a projection for future developments.
+
+                        Crucially, the subject is divided into three main dimensions: the ethical framework, the economic drivers, and the technological implementation. The consensus among experts is that a robust and regulated approach will be essential to harness its full potential across global markets, ensuring sustainable growth derived from the core principles.
+                        `
+                        : `
+                        <h3>Story: The Chronical of the Azure Wanderer</h3>
+
+                        It began with a whisper in the fractal neon streets, a tale of the Azure Wanderer, whose shadow stretched across a thousand digital plains. The secret of **${prompt}** was the key—a hidden algorithm whispered to be the ghost in the global neural net.
+
+                        She sought the genesis point, the place where code became soul, guided only by the shimmer of a defunct satellite. Her journey was a symphony of risk, each step a calculated defiance of the System's control. In the end, she didn't find the algorithm; she became it, rewriting the rules of the matrix with a single, elegant line of violet code.
+                        `;
+
+                    const wordCount = content.split(/\s+/).length;
+                    const pdfFileName = `${prompt.substring(0, 15).replace(/\s/g, '_')}_${type}.pdf`;
+
+                    // 3. Display Results
+                    resultContainer.innerHTML = `<pre>${content.trim()}</pre>`;
+
+                    // 4. Display Stats and Link
+                    statsContainer.innerHTML = `
+                        <div class="stat-item">
+                            <span class="stat-value">${wordCount}</span>
+                            <span>Word Count</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">${type.toUpperCase()}</span>
+                            <span>Content Type</span>
+                        </div>
+                        <div class="stat-item">
+                            <a href="#" class="stat-value red-link" onclick="alert('PDF generated! This button is a placeholder for the file download.'); return false;">
+                                ⬇️ Download PDF
+                            </a>
+                            <span>File Name: ${pdfFileName}</span>
+                        </div>
+                    `;
+                    
+                    // 5. Re-enable buttons
+                    buttons.forEach(btn => btn.disabled = false);
+
+                }, 2500); // Simulated processing time
+            }
+        });
+    </script>
+</body>
+</html>
